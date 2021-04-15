@@ -20,12 +20,10 @@ public class App extends JFrame
 	public App()
 	{
 		panel = new JPanel();
-//		panel.setLayout(new BorderLayout());
+
 		menubar = new JMenuBar();
-		
-		
-		
-		
+		panel.setLayout(new BorderLayout());
+
 		//buttons
 		ok = new JButton("Okay");
 		cancel = new JButton("Cancel");
@@ -38,8 +36,8 @@ public class App extends JFrame
 	public void go()
 	{
 		buildMenu();
-		panel.add(ok, BorderLayout.NORTH);
-		panel.add(cancel, BorderLayout.SOUTH);
+//		panel.add(ok, BorderLayout.NORTH);
+//		panel.add(cancel, BorderLayout.SOUTH);
 
 		this.add(panel);
 		this.setSize(300,500);
@@ -49,22 +47,30 @@ public class App extends JFrame
 	
 	private void buildMenu()
 	{
-		JMenu file, help;
-		file = new JMenu("File");
-		help = new JMenu("Help");
+		JMenu fileMenu, helpMenu, runMenu;
+		fileMenu = new JMenu("File");
+		helpMenu = new JMenu("Help");
+		runMenu = new JMenu("Run");
 		
 		JMenuItem exit = new JMenuItem("Exit");
 		JMenuItem about = new JMenuItem("About");
+		JMenuItem run = new JMenuItem("Run");
+		JMenuItem debug = new JMenuItem("Debug");
 		
+		run.addActionListener(new RunActionListener());
+		debug.addActionListener(new RunActionListener());
 		exit.addActionListener(new ExitActionListener());
 		about.addActionListener(new AboutActionListener());
 		
-		file.add(exit);
-		help.add(about);
+		fileMenu.add(exit);
+		helpMenu.add(about);
+		runMenu.add(run);
+		runMenu.add(debug);
 		
-		menubar.add(file);
-		menubar.add(help);
-		panel.add(menubar);
+		menubar.add(fileMenu);
+		menubar.add(runMenu);
+		menubar.add(helpMenu);
+		panel.add(menubar, BorderLayout.NORTH);
 	}
 	
 	//watches buttons for clicks
@@ -72,8 +78,8 @@ public class App extends JFrame
 	{
 		@Override
 		public void actionPerformed(ActionEvent e) {
-//			AboutDlg dlg = new AboutDlg( null, true);
-			System.out.println("Java Swing Menus Minute 17");
+			AboutDlg dlg = new AboutDlg( null, true);
+			dlg.setVisible(true);
 		}
 	}
 	
@@ -89,6 +95,21 @@ public class App extends JFrame
 			else if (e.getActionCommand().equals("Cancel"))
 			{
 				System.out.print("Cancel");
+			}
+		}
+	}
+	
+	private class RunActionListener implements ActionListener
+	{
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			if (e.getActionCommand().equals("Run"))
+			{
+				System.out.println("Running the Program");
+			}
+			else 
+			{
+				System.out.println("Debugging the program");
 			}
 		}
 	}
