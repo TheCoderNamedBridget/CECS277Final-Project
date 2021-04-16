@@ -8,10 +8,16 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.JTextField;
 
 public class AboutDlg extends JDialog {
 
 	private final JPanel contentPanel = new JPanel();
+	private JTextField textField;
+	private JTextField textField_1;
 
 	/**
 	 * Launch the application.
@@ -25,7 +31,23 @@ public class AboutDlg extends JDialog {
 			e.printStackTrace();
 		}
 	}
-
+	
+	public String getToField()
+	{
+		return textField.getText();
+	}
+	
+	public void setFromField( String s )
+	{
+		textField_1.setText(s);
+	}
+	class SubmitActionListener implements ActionListener
+	{
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			setFromField( getToField() );
+		}
+	}
 	/**
 	 * Create the dialog.
 	 */
@@ -40,6 +62,21 @@ public class AboutDlg extends JDialog {
 			JLabel lblNewLabel = new JLabel("About");
 			contentPanel.add(lblNewLabel);
 			
+		}
+		{
+			textField = new JTextField();
+			contentPanel.add(textField);
+			textField.setColumns(10);
+		}
+		{
+			textField_1 = new JTextField();
+			contentPanel.add(textField_1);
+			textField_1.setColumns(10);
+		}
+		{
+			JButton btnNewButton = new JButton("Submit");
+			contentPanel.add(btnNewButton);
+			btnNewButton.addActionListener(new SubmitActionListener());
 		}
 		{
 			JPanel buttonPane = new JPanel();
@@ -60,6 +97,8 @@ public class AboutDlg extends JDialog {
 				buttonPane.add(cancelButton);
 			}
 		}
+		
+		
 	}
 
 }
