@@ -1,4 +1,5 @@
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -10,6 +11,9 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JTree;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
 
 
 
@@ -19,7 +23,8 @@ public class App extends JFrame
 	JDesktopPane desktopPane;
 	JButton ok, cancel;
 	JMenuBar menubar, statusbar;
-	
+	DefaultTreeModel treeModel;
+	JTree tree;
 	public App()
 	{
 		panel = new JPanel();
@@ -28,11 +33,22 @@ public class App extends JFrame
 		statusbar = new JMenuBar();
 		panel.setLayout(new BorderLayout());
 		desktopPane = new JDesktopPane();
+		
+		tree = new JTree();
+		tree.setPreferredSize( new Dimension(400,400));
+		buildTree();
+		
+		panel.add(tree);
+		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		this.setSize(420, 420);
+		this.setTitle("A Tree Demo");
 
 	}
 	
 	public void go()
 	{
+
+		
 		buildMenu();
 		//buildtoolbar
 		buildStatusBar();
@@ -41,12 +57,37 @@ public class App extends JFrame
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setVisible(true);
 		this.setTitle("CECS 277 Final Project");
+		
+		
+		
+		
 		add(panel);
 		panel.add(menubar, BorderLayout.NORTH);
 		panel.add(ok);
 		panel.add(desktopPane, BorderLayout.CENTER);
 		
+		
+		
 		ok.addActionListener(new OkActionListener());
+	}
+	
+	private void buildTree()
+	{
+		DefaultMutableTreeNode root = new DefaultMutableTreeNode("Root");
+		treeModel = new DefaultTreeModel(root);
+		
+		DefaultMutableTreeNode node = new DefaultMutableTreeNode("Node1");
+		root.add(node);
+		node = new DefaultMutableTreeNode("Node2");
+		root.add(node);
+		for ( int i = 0;i < 10; i++ )
+		{
+			DefaultMutableTreeNode subNode = new DefaultMutableTreeNode("subNode" + i);
+			node.add(subNode);
+		}
+		
+		tree.setModel(treeModel);
+		
 		
 	}
 	
@@ -108,6 +149,8 @@ public class App extends JFrame
 		desktopPane.add(ff);
 		desktopPane.add(ff1);
 	}
+	
+	
 	
 	//watches buttons for clicks
 	private class AboutActionListener implements ActionListener
