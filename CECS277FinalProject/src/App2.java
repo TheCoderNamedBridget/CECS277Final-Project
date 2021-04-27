@@ -1,7 +1,14 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.dnd.DnDConstants;
+import java.awt.dnd.DropTarget;
+import java.awt.dnd.DropTargetDropEvent;
 import java.awt.event.*;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.swing.tree.DefaultTreeModel;
 
 
@@ -15,6 +22,8 @@ public class App extends JFrame
     String currentDrive;
     DefaultTreeModel treeModel;
     JTree tree;
+    JList list = new JList();
+    DefaultListModel model = new DefaultListModel();
 
     public App()
     {
@@ -27,13 +36,25 @@ public class App extends JFrame
         desktop = new JDesktopPane();
         myFrame = new FileFrame();
         myFrame2 = new FileFrame();
+        
+        buildModel();
 //        } catch (IOException ex){
 //            Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
 //        }
     }
+    
+    private void buildModel()
+    {
+    	model.addElement("You can drag and drop files on me");
+    	model.addElement("I am just here to demonstrate functionality");
+    	model.addElement("there are comments are labeled [TODO] around where I was added");
+    	list.setPreferredSize(new Dimension(280, 300));
+    	list.setModel(model);
+    }
 
     public void go()
     {
+    	
         this.setTitle("File Manager");
         panel.setLayout(new BorderLayout());
         topPanel.setLayout(new BorderLayout());
@@ -44,6 +65,8 @@ public class App extends JFrame
         panel.add(topPanel, BorderLayout.NORTH);
         this.add(panel);
         myFrame.setVisible(true);
+        //TODO Change this later this is just here for drag nad drop functionality
+        panel.add(list, BorderLayout.NORTH);
 
         desktop.add(myFrame);
         panel.add(desktop,BorderLayout.CENTER);
@@ -58,7 +81,10 @@ public class App extends JFrame
         this.setSize(1000,800);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setVisible(true);
+        
+        this.setDropTarget(new MyDropTarget());
     }
+    
 
     private void buildMenu()
     {
@@ -172,5 +198,27 @@ public class App extends JFrame
 
             dlg.setVisible(true);
         }
+    }
+    
+    class MyDropTarget extends DropTarget {
+
+    	public void drop(DropTargetDropEvent evt )
+    	{
+    		try 
+    		{
+    			evt.acceptDrop(DnDConstants.ACTION_COPY);
+    			List result = new ArrayList();
+    			result = (List)evt.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
+    			for ( Object o : result )
+    			{
+    				System.out.println(o.toString());
+    				model.addElement(o.toString());
+    			}
+    		}
+    		catch ( Exception ex )
+    		{
+    			
+    		}
+    	}
     }
 }
