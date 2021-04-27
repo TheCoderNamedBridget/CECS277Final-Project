@@ -3,6 +3,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileSystemView;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.tree.DefaultMutableTreeNode;
 import java.io.File;
 
 public class FilePanel extends JInternalFrame {
@@ -33,6 +34,8 @@ public class FilePanel extends JInternalFrame {
     }
 
     public static void setTableData(File[] files) {
+        tableModel = new DefaultTableModel();
+
         tableModel.setColumnIdentifiers(new String[]{"Files Names"});
 
         Object[] row = new Object[1];
