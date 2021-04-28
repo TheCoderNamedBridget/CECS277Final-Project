@@ -1,31 +1,26 @@
 import javax.swing.*;
-import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileSystemView;
-import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.io.File;
+import java.util.Date;
 
 public class FilePanel extends JInternalFrame {
     private static JTable table = new JTable();
-    private File[] files;
     private final static FileSystemView fileSystemView = FileSystemView.getFileSystemView();
     private static FileTableModel fileTableModel;
     private static ListSelectionListener listSelectionListener;
     private static boolean cellSizesSet = false;
-    private final String[] columns = {
-            "Icon",
-            "File",
-            "Path/name",
-            "Size",
-            "Last Modified",
-            "R",
-            "W",
-            "E",
-            "D",
-            "F",
-    };
+    private JLabel fileName;
+    private JTextField path;
+    private JLabel date;
+    private JLabel size;
+    private JCheckBox readable;
+    private JCheckBox writable;
+    private JCheckBox executable;
+    private JRadioButton isDirectory;
+    private JRadioButton isFile;
 
     public FilePanel() {
         JScrollPane scrollPane = new JScrollPane();
@@ -33,6 +28,10 @@ public class FilePanel extends JInternalFrame {
         add(scrollPane);
         this.setResizable(true);
         setVisible(true);
+        listSelectionListener = lse -> {
+            int row = table.getSelectionModel().getLeadSelectionIndex();
+            setFileDetails( ((FileTableModel)table.getModel()).getFile(row) );
+        };
     }
 
     public static void setTableData(File[] files) {
@@ -60,7 +59,6 @@ public class FilePanel extends JInternalFrame {
 
             cellSizesSet = true;
         }
-        table.setModel(fileTableModel);
     }
 
     private static void setColumnWidth(int column, int width) {
@@ -75,7 +73,21 @@ public class FilePanel extends JInternalFrame {
         tableColumn.setMinWidth(width);
     }
 
+    private void setFileDetails(File file) {
+        Icon icon = fileSystemView.getSystemIcon(file);
+        fileName.setIcon(icon);
+        fileName.setText(fileSystemView.getSystemDisplayName(file));
+        path.setText(file.getPath());
+        date.setText(new Date(file.lastModified()).toString());
+        size.setText(file.length() + " bytes");
+        readable.setSelected(file.canRead());
+        writable.setSelected(file.canWrite());
+        executable.setSelected(file.canExecute());
+        isDirectory.setSelected(file.isDirectory());
+
+        isFile.setSelected(file.isFile());
+    }
+
 
 
 }
-
