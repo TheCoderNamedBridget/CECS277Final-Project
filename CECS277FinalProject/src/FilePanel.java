@@ -3,8 +3,14 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileSystemView;
 import javax.swing.table.TableColumn;
 import java.awt.*;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.dnd.DnDConstants;
+import java.awt.dnd.DropTarget;
+import java.awt.dnd.DropTargetDropEvent;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class FilePanel extends JInternalFrame {
     private static JTable table = new JTable();
@@ -21,17 +27,29 @@ public class FilePanel extends JInternalFrame {
     private JCheckBox executable;
     private JRadioButton isDirectory;
     private JRadioButton isFile;
+    JList list = new JList();
+    DefaultListModel model = new DefaultListModel();
+    
+    
 
     public FilePanel() {
         JScrollPane scrollPane = new JScrollPane();
         scrollPane.setViewportView(table);
         add(scrollPane);
         this.setResizable(true);
+        
         setVisible(true);
         listSelectionListener = lse -> {
             int row = table.getSelectionModel().getLeadSelectionIndex();
             setFileDetails( ((FileTableModel)table.getModel()).getFile(row) );
         };
+        //DRAG AND DROP FEATURE
+//        list.setPreferredSize(new Dimension(500,500));
+//        this.setDropTarget(new MyDropTarget());
+//        list.setDragEnabled(true);
+//        list.setModel(model);
+//        add(list);
+
     }
 
     public static void setTableData(File[] files) {
@@ -87,7 +105,43 @@ public class FilePanel extends JInternalFrame {
 
         isFile.setSelected(file.isFile());
     }
+    class MyDropTarget extends DropTarget {
 
+    	  public void drop(DropTargetDropEvent evt )
+    	  {
+    	      try
+    	      {
+    	          evt.acceptDrop(DnDConstants.ACTION_COPY);
+    	          List result = new ArrayList();
+//    	          result = (List)evt.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
+    	          if (evt.getTransferable().isDataFlavorSupported(DataFlavor.stringFlavor))
+    	          {
+    	        	  String temp = (String)evt.getTransferable().getTransferData(DataFlavor.stringFlavor);
+    	        	  
+    	        	  String[] next = temp.split("\\n");
+    	        	  
+    	        	  for ( int i = 0; i < next.length; i ++)
+    	        	  {
+    	        		  model.addElement(next[i]);
+    	        	  }
+    	          }
+    	          else
+    	          {
+    	        	  result = (List)evt.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
+    	              for ( Object o : result )
+    	              {
+    	                  System.out.println(o.toString());
+    	                  model.addElement(o.toString());
+    	              }
+    	          }
+
+    	      }
+    	      catch ( Exception ex )
+    	      {
+    	    	  ex.printStackTrace();
+    	      }
+    	  }
+    	}
 
 
 }
