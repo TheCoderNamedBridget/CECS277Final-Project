@@ -8,7 +8,9 @@ public class FileFrame extends JInternalFrame
 	public  FileFrame()
 	{
 		splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, new DirPanel(), new FilePanel());
-		this.setTitle("C:");
+		
+		//This line may change based on Windows/macOS/Linux OS's
+        	this.setTitle(FileSystemView.getFileSystemView().getHomeDirectory().getParentFile().getParentFile().getPath());
 		
 		this.getContentPane().add(splitPane);
 		this.setMaximizable(true);
