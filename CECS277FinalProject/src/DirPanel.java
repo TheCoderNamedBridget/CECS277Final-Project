@@ -1,9 +1,9 @@
 import javax.swing.*;
-import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.filechooser.FileSystemView;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import java.awt.*;
 import java.io.File;
 import java.util.List;
 
@@ -15,6 +15,11 @@ public class DirPanel extends JInternalFrame {
         buildTree();
         JScrollPane scrollPane = new JScrollPane();
         scrollPane.setViewportView(dirTree);
+        Dimension preferredSize = scrollPane.getPreferredSize();
+        Dimension widePreferred = new Dimension(
+                200,
+                (int)preferredSize.getHeight());
+        scrollPane.setPreferredSize( widePreferred );
         add(scrollPane);
         this.setResizable(true);
         setVisible(true);
@@ -22,15 +27,12 @@ public class DirPanel extends JInternalFrame {
 
     private void buildTree() {
         fileSystemView = FileSystemView.getFileSystemView();
-        DefaultMutableTreeNode root = new DefaultMutableTreeNode("Root");
+        DefaultMutableTreeNode root = new DefaultMutableTreeNode(fileSystemView.getHomeDirectory());
         DefaultTreeModel treeModel = new DefaultTreeModel(root);
 
-        TreeSelectionListener treeSelectionListener = new TreeSelectionListener() {
-            public void valueChanged(TreeSelectionEvent tse) {
-                DefaultMutableTreeNode node =
-                        (DefaultMutableTreeNode) tse.getPath().getLastPathComponent();
-                showChildren(node);
-            }
+        TreeSelectionListener treeSelectionListener = tse -> {
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode) tse.getPath().getLastPathComponent();
+            showChildren(node);
         };
 
         File[] roots = fileSystemView.getRoots();
