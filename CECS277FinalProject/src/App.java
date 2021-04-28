@@ -78,6 +78,7 @@ public class App extends JFrame
         buildStatusBar();
         panel.add(statusBar, BorderLayout.SOUTH);
 
+
         this.add(panel);
         this.setSize(1000,800);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
