@@ -1,93 +1,211 @@
 import javax.swing.*;
-import javax.swing.event.ListSelectionListener;
-import javax.swing.filechooser.FileSystemView;
-import javax.swing.table.TableColumn;
 import java.awt.*;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.dnd.DnDConstants;
+import java.awt.dnd.DropTarget;
+import java.awt.dnd.DropTargetDropEvent;
+import java.awt.event.*;
 import java.io.File;
-import java.util.Date;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
-public class FilePanel extends JInternalFrame {
-    private static JTable table = new JTable();
-    private final static FileSystemView fileSystemView = FileSystemView.getFileSystemView();
-    private static FileTableModel fileTableModel;
-    private static ListSelectionListener listSelectionListener;
-    private static boolean cellSizesSet = false;
-    private JLabel fileName;
-    private JTextField path;
-    private JLabel date;
-    private JLabel size;
-    private JCheckBox readable;
-    private JCheckBox writable;
-    private JCheckBox executable;
-    private JRadioButton isDirectory;
-    private JRadioButton isFile;
+import javax.swing.filechooser.FileSystemView;
+import javax.swing.tree.DefaultTreeModel;
 
-    public FilePanel() {
-        JScrollPane scrollPane = new JScrollPane();
-        scrollPane.setViewportView(table);
-        add(scrollPane);
-        this.setResizable(true);
-        setVisible(true);
-        listSelectionListener = lse -> {
-            int row = table.getSelectionModel().getLeadSelectionIndex();
-            setFileDetails( ((FileTableModel)table.getModel()).getFile(row) );
-        };
+
+public class App extends JFrame
+{
+    JPanel panel, topPanel;
+    JMenuBar menuBar;
+    JToolBar toolBar, statusBar;
+    JComboBox<String> comboBox;
+    JDesktopPane desktop;
+    FileFrame myFrame;
+    String currentDrive;
+    JList list = new JList();
+    DefaultListModel model = new DefaultListModel();
+
+    public App()
+    {
+        //try {
+        panel = new JPanel();
+        topPanel = new JPanel();
+        menuBar = new JMenuBar();
+        toolBar = new JToolBar();
+        statusBar = new JToolBar();
+        desktop = new JDesktopPane();
+        myFrame = new FileFrame();
+
+        //buildModel();
+//        } catch (IOException ex){
+//            Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
+//        }
     }
 
-    public static void setTableData(File[] files) {
-        if (fileTableModel == null) {
-            fileTableModel = new FileTableModel();
-            table.setModel(fileTableModel);
+/*    private void buildModel()
+    {
+        model.addElement("You can drag and drop files on me");
+        model.addElement("I am just here to demonstrate functionality");
+        model.addElement("there are comments are labeled [TODO] around where I was added");
+        list.setPreferredSize(new Dimension(280, 300));
+        list.setModel(model);
+    }*/
+
+    public void go()
+    {
+
+        this.setTitle("File Manager");
+        panel.setLayout(new BorderLayout());
+        topPanel.setLayout(new BorderLayout());
+        buildMenu();
+
+        topPanel.add(menuBar,BorderLayout.NORTH);
+
+        //buildComboBox();
+        //topPanel.add(comboBox,BorderLayout.NORTH);
+
+        panel.add(topPanel, BorderLayout.NORTH);
+        this.add(panel);
+        myFrame.setVisible(true);
+        //TODO Change this later this is just here for drag nad drop functionality
+        //panel.add(list, BorderLayout.NORTH);
+
+        desktop.add(myFrame);
+        panel.add(desktop,BorderLayout.CENTER);
+
+        currentDrive = "CurrentDrive";
+        buildStatusBar();
+        panel.add(statusBar, BorderLayout.SOUTH);
+
+
+        this.add(panel);
+        this.setSize(1000,800);
+        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        this.setVisible(true);
+
+        //this.setDropTarget(new MyDropTarget());
+    }
+
+/*    private void buildComboBox(){
+        File[] drives = File.listRoots();
+        ArrayList<String> list = new ArrayList<String>();
+        for(File x : drives){
+            list.add(x.getName());
         }
-        table.getSelectionModel().removeListSelectionListener(listSelectionListener);
-        fileTableModel.setFiles(files);
-        table.getSelectionModel().addListSelectionListener(listSelectionListener);
-        if (!cellSizesSet) {
-            Icon icon = fileSystemView.getSystemIcon(files[0]);
+        //FileSystemView fsv = FileSystemView.getFileSystemView();
+        comboBox= new JComboBox<>(list.toArray(new String[list.size()]));
+    }*/
 
-            table.setRowHeight(icon.getIconHeight());
 
-            setColumnWidth(0, -1);
-            setColumnWidth(3, 60);
-            table.getColumnModel().getColumn(3).setMaxWidth(120);
-            setColumnWidth(4, -1);
-            setColumnWidth(5, -1);
-            setColumnWidth(6, -1);
-            setColumnWidth(7, -1);
-            setColumnWidth(8, -1);
-            setColumnWidth(9, -1);
+    private void buildMenu()
+    {
+        JMenu fileMenu, helpMenu, treeMenu, windowMenu;
+        fileMenu = new JMenu("File");
+        treeMenu = new JMenu("Tree");
+        windowMenu = new JMenu("Window");
+        helpMenu = new JMenu("Help");
 
-            cellSizesSet = true;
+        //menu options for file
+        JMenuItem rename = new JMenuItem("Rename");
+        JMenuItem copy = new JMenuItem("Copy");
+        JMenuItem delete = new JMenuItem("Delete");
+        JMenuItem run = new JMenuItem("Run");
+        JMenuItem exit = new JMenuItem("Exit");
+
+        //menu options for tree
+        JMenuItem expandBranch = new JMenuItem("ExpandBranch");
+        JMenuItem collapseBranch = new JMenuItem("CollapseBranch");
+
+        //menu options for window
+        JMenuItem newW = new JMenuItem("New");
+        JMenuItem cascade = new JMenuItem("Cascade");
+
+        //menu options for help
+        JMenuItem about = new JMenuItem("About");
+        JMenuItem help = new JMenuItem("Help");
+
+        expandBranch.addActionListener(new RunActionListener());
+        collapseBranch.addActionListener(new RunActionListener());
+        run.addActionListener(new RunActionListener());
+        newW.addActionListener(new RunActionListener());
+        help.addActionListener(new RunActionListener());
+        exit.addActionListener(new ExitActionListener());
+        about.addActionListener(new AboutActionListener());
+
+        fileMenu.add(rename);
+        fileMenu.add(copy);
+        fileMenu.add(delete);
+        fileMenu.add(run);
+        fileMenu.add(exit);
+
+        treeMenu.add(expandBranch);
+        treeMenu.add(collapseBranch);
+
+        windowMenu.add(newW);
+        windowMenu.add(cascade);
+
+        helpMenu.add(about);
+        helpMenu.add(help);
+
+        menuBar.add(fileMenu);
+        menuBar.add(treeMenu);
+        menuBar.add(windowMenu);
+        menuBar.add(helpMenu);
+        panel.add(menuBar, BorderLayout.NORTH);
+    }
+
+    private void buildStatusBar() {
+        JLabel status = new JLabel("Total Space: ");
+        statusBar.add(status);
+        panel.add(statusBar, BorderLayout.SOUTH);
+
+    }
+
+    private class RunActionListener implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if (e.getActionCommand().equals("Tree"))
+            {
+                System.out.println("Running the Program");
+            } else if(e.getActionCommand().equals("New")){
+                desktop.add(new FileFrame());
+            }
+            else
+            {
+                System.out.println("Debugging the program");
+            }
+        }
+    }
+    private static class AboutActionListener implements ActionListener{
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            AboutDlg dlg = new AboutDlg(null,true);
+
+            dlg.setVisible(true);
         }
     }
 
-    private static void setColumnWidth(int column, int width) {
-        TableColumn tableColumn = table.getColumnModel().getColumn(column);
-        if (width<0) {
-            JLabel label = new JLabel( (String)tableColumn.getHeaderValue() );
-            Dimension preferred = label.getPreferredSize();
-            width = (int)preferred.getWidth();
-        }
-        tableColumn.setPreferredWidth(width);
-        tableColumn.setMaxWidth(width);
-        tableColumn.setMinWidth(width);
-    }
-
-    private void setFileDetails(File file) {
-        Icon icon = fileSystemView.getSystemIcon(file);
-        fileName.setIcon(icon);
-        fileName.setText(fileSystemView.getSystemDisplayName(file));
-        path.setText(file.getPath());
-        date.setText(new Date(file.lastModified()).toString());
-        size.setText(file.length() + " bytes");
-        readable.setSelected(file.canRead());
-        writable.setSelected(file.canWrite());
-        executable.setSelected(file.canExecute());
-        isDirectory.setSelected(file.isDirectory());
-
-        isFile.setSelected(file.isFile());
-    }
-
-
-
+//    class MyDropTarget extends DropTarget {
+//
+//        public void drop(DropTargetDropEvent evt )
+//        {
+//            try
+//            {
+//                evt.acceptDrop(DnDConstants.ACTION_COPY);
+//                List result = new ArrayList<Object>();
+//                result = (List)evt.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
+//                for ( Object o : result )
+//                {
+//                    System.out.println(o.toString());
+//                    model.addElement(o.toString());
+//                }
+//            }
+//            catch ( Exception ex )
+//            {
+//
+//            }
+//        }
+//    }
 }
