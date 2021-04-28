@@ -7,8 +7,10 @@ import java.awt.dnd.DropTargetDropEvent;
 import java.awt.event.*;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+import javax.swing.filechooser.FileSystemView;
 import javax.swing.tree.DefaultTreeModel;
 
 
@@ -16,12 +18,11 @@ public class App extends JFrame
 {
     JPanel panel, topPanel;
     JMenuBar menuBar;
-    JToolBar toolBar, driveBar, statusBar;
+    JToolBar toolBar, statusBar;
+    JComboBox<String> comboBox;
     JDesktopPane desktop;
-    FileFrame myFrame, myFrame2;
+    FileFrame myFrame;
     String currentDrive;
-    DefaultTreeModel treeModel;
-    JTree tree;
     JList list = new JList();
     DefaultListModel model = new DefaultListModel();
 
@@ -35,26 +36,25 @@ public class App extends JFrame
         statusBar = new JToolBar();
         desktop = new JDesktopPane();
         myFrame = new FileFrame();
-        myFrame2 = new FileFrame();
-        
-        buildModel();
+
+        //buildModel();
 //        } catch (IOException ex){
 //            Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
 //        }
     }
-    
-    private void buildModel()
+
+/*    private void buildModel()
     {
-    	model.addElement("You can drag and drop files on me");
-    	model.addElement("I am just here to demonstrate functionality");
-    	model.addElement("there are comments are labeled [TODO] around where I was added");
-    	list.setPreferredSize(new Dimension(280, 300));
-    	list.setModel(model);
-    }
+        model.addElement("You can drag and drop files on me");
+        model.addElement("I am just here to demonstrate functionality");
+        model.addElement("there are comments are labeled [TODO] around where I was added");
+        list.setPreferredSize(new Dimension(280, 300));
+        list.setModel(model);
+    }*/
 
     public void go()
     {
-    	
+
         this.setTitle("File Manager");
         panel.setLayout(new BorderLayout());
         topPanel.setLayout(new BorderLayout());
@@ -62,16 +62,17 @@ public class App extends JFrame
 
         topPanel.add(menuBar,BorderLayout.NORTH);
 
+        //buildComboBox();
+        //topPanel.add(comboBox,BorderLayout.NORTH);
+
         panel.add(topPanel, BorderLayout.NORTH);
         this.add(panel);
         myFrame.setVisible(true);
         //TODO Change this later this is just here for drag nad drop functionality
-        panel.add(list, BorderLayout.NORTH);
+        //panel.add(list, BorderLayout.NORTH);
 
         desktop.add(myFrame);
         panel.add(desktop,BorderLayout.CENTER);
-        //buildToolBar();
-        //topPanel.add(toolBar, BorderLayout.SOUTH);
 
         currentDrive = "CurrentDrive";
         buildStatusBar();
@@ -81,10 +82,20 @@ public class App extends JFrame
         this.setSize(1000,800);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setVisible(true);
-        
-        this.setDropTarget(new MyDropTarget());
+
+        //this.setDropTarget(new MyDropTarget());
     }
-    
+
+/*    private void buildComboBox(){
+        File[] drives = File.listRoots();
+        ArrayList<String> list = new ArrayList<String>();
+        for(File x : drives){
+            list.add(x.getName());
+        }
+        //FileSystemView fsv = FileSystemView.getFileSystemView();
+        comboBox= new JComboBox<>(list.toArray(new String[list.size()]));
+    }*/
+
 
     private void buildMenu()
     {
@@ -93,15 +104,6 @@ public class App extends JFrame
         treeMenu = new JMenu("Tree");
         windowMenu = new JMenu("Window");
         helpMenu = new JMenu("Help");
-
-        JComboBox comboBox;
-
-        File[] drives = File.listRoots();
-        //FileSystemView fsv = FileSystemView.getFileSystemView();
-        comboBox= new JComboBox(drives);
-
-
-        panel.add(comboBox, BorderLayout.NORTH);
 
         //menu options for file
         JMenuItem rename = new JMenuItem("Rename");
@@ -123,6 +125,8 @@ public class App extends JFrame
         JMenuItem help = new JMenuItem("Help");
 
         expandBranch.addActionListener(new RunActionListener());
+        collapseBranch.addActionListener(new RunActionListener());
+        run.addActionListener(new RunActionListener());
         newW.addActionListener(new RunActionListener());
         help.addActionListener(new RunActionListener());
         exit.addActionListener(new ExitActionListener());
@@ -150,26 +154,6 @@ public class App extends JFrame
         panel.add(menuBar, BorderLayout.NORTH);
     }
 
-    private void buildToolBar() {
-        JMenu file, help;
-        file = new JMenu("File");
-        help = new JMenu("Help");
-
-        JMenuItem exit = new JMenuItem("Exit");
-        JMenuItem about = new JMenuItem("About");
-
-        exit.addActionListener(new ExitActionListener());
-        about.addActionListener(new AboutActionListener());
-
-        file.add(exit);
-        help.add(about);
-
-        toolBar.add(file);
-        toolBar.add(help);
-        panel.add(toolBar, BorderLayout.SOUTH);
-
-    }
-
     private void buildStatusBar() {
         JLabel status = new JLabel("Total Space: ");
         statusBar.add(status);
@@ -177,12 +161,14 @@ public class App extends JFrame
 
     }
 
-    private static class RunActionListener implements ActionListener {
+    private class RunActionListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
             if (e.getActionCommand().equals("Tree"))
             {
                 System.out.println("Running the Program");
+            } else if(e.getActionCommand().equals("New")){
+                desktop.add(new FileFrame());
             }
             else
             {
@@ -199,26 +185,26 @@ public class App extends JFrame
             dlg.setVisible(true);
         }
     }
-    
-    class MyDropTarget extends DropTarget {
 
-    	public void drop(DropTargetDropEvent evt )
-    	{
-    		try 
-    		{
-    			evt.acceptDrop(DnDConstants.ACTION_COPY);
-    			List result = new ArrayList();
-    			result = (List)evt.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
-    			for ( Object o : result )
-    			{
-    				System.out.println(o.toString());
-    				model.addElement(o.toString());
-    			}
-    		}
-    		catch ( Exception ex )
-    		{
-    			
-    		}
-    	}
-    }
+//    class MyDropTarget extends DropTarget {
+//
+//        public void drop(DropTargetDropEvent evt )
+//        {
+//            try
+//            {
+//                evt.acceptDrop(DnDConstants.ACTION_COPY);
+//                List result = new ArrayList<Object>();
+//                result = (List)evt.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
+//                for ( Object o : result )
+//                {
+//                    System.out.println(o.toString());
+//                    model.addElement(o.toString());
+//                }
+//            }
+//            catch ( Exception ex )
+//            {
+//
+//            }
+//        }
+//    }
 }
