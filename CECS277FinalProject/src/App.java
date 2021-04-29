@@ -174,15 +174,7 @@ public class App extends JFrame
         panel.add(statusBar, BorderLayout.SOUTH);
 
     }
-    
-    public static void displayMemoryToStatusBar(String space) {
-        JLabel status = new JLabel(space);
-        System.out.println("you wanted me to display this " + space );
-        statusBar.add(status);
-        System.out.println("you wanted me to display this2 " + status.getText() );
-        panel.add(statusBar, BorderLayout.SOUTH);
 
-    }
 
     private class RunActionListener implements ActionListener {
         @Override
