@@ -45,15 +45,6 @@ public class FilePanel extends JInternalFrame {
         setVisible(true);
         listSelectionListener = lse -> {
             int row = table.getSelectionModel().getLeadSelectionIndex();
-//            System.out.println("What are you bro1 "+ ((FileTableModel)table.getModel()).getFile(row) );
-//            System.out.println("What are you bro2 "+ ((FileTableModel)table.getModel()).getFile(row).getAbsolutePath() );
-//            long num = ((FileTableModel)table.getModel()).getFile(row).length() + 0;
-//			System.out.println("What are you bro3 "+ ((FileTableModel)table.getModel()).getFile(row).length() );
-//			System.out.println("What are you bro4 "+ num );
-			
-//            App.displayMemoryToStatusBar("I am the ultimate displayer ");
-//            App.displayMemoryToStatusBar("" + num);
-//            System.out.println("What are you bro "+ ((FileTableModel)table.getModel()).getFile(row) );
             setFileDetails( ((FileTableModel)table.getModel()).getFile(row) );
             
             
