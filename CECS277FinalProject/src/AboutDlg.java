@@ -16,8 +16,6 @@ import javax.swing.JTextField;
 public class AboutDlg extends JDialog {
 
 	private final JPanel contentPanel = new JPanel();
-	private JTextField textField;
-	private JTextField textField_1;
 
 	/**
 	 * Launch the application.
@@ -32,22 +30,10 @@ public class AboutDlg extends JDialog {
 		}
 	}
 	
-	public String getToField()
-	{
-		return textField.getText();
-	}
-	
-	public void setFromField( String s )
-	{
-		textField_1.setText(s);
-	}
-	class SubmitActionListener implements ActionListener
-	{
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			setFromField( getToField() );
-		}
-	}
+//	public String getToField()
+//	{
+//		return textField.getText();
+//	}
 	/**
 	 * Create the dialog.
 	 */
@@ -59,24 +45,14 @@ public class AboutDlg extends JDialog {
 		
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
 		{
-			JLabel lblNewLabel = new JLabel("About");
+			JLabel lblNewLabel = new JLabel("CECS 277 File Manager");
+			lblNewLabel.setFont(new Font("Serif", Font.PLAIN, 40));
 			contentPanel.add(lblNewLabel);
 			
 		}
 		{
-			textField = new JTextField();
-			contentPanel.add(textField);
-			textField.setColumns(10);
-		}
-		{
-			textField_1 = new JTextField();
-			contentPanel.add(textField_1);
-			textField_1.setColumns(10);
-		}
-		{
-			JButton btnNewButton = new JButton("Submit");
-			contentPanel.add(btnNewButton);
-			btnNewButton.addActionListener(new SubmitActionListener());
+			JLabel lblNewLabel_1 = new JLabel("copyright(c) 2021 Dr. Hoffman");
+			contentPanel.add(lblNewLabel_1);
 		}
 		{
 			JPanel buttonPane = new JPanel();
@@ -84,17 +60,13 @@ public class AboutDlg extends JDialog {
 			getContentPane().add(buttonPane, BorderLayout.SOUTH);
 			{
 				JButton okButton = new JButton("OK");
+				okButton.setHorizontalAlignment(SwingConstants.LEFT);
 				okButton.setActionCommand("OK");
 				buttonPane.add(okButton);
 				
 				getRootPane().setDefaultButton(okButton);
 				this.setVisible(false);
 				okButton.addActionListener(new ExitActionListener());
-			}
-			{
-				JButton cancelButton = new JButton("Cancel");
-				cancelButton.setActionCommand("Cancel");
-				buttonPane.add(cancelButton);
 			}
 		}
 		
