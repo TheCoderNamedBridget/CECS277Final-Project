@@ -8,6 +8,7 @@ import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DropTarget;
 import java.awt.dnd.DropTargetDropEvent;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -18,37 +19,54 @@ public class FilePanel extends JInternalFrame {
     private static FileTableModel fileTableModel;
     private static ListSelectionListener listSelectionListener;
     private static boolean cellSizesSet = false;
-    private JLabel fileName;
-    private JTextField path;
-    private JLabel date;
-    private JLabel size;
-    private JCheckBox readable;
-    private JCheckBox writable;
-    private JCheckBox executable;
-    private JRadioButton isDirectory;
-    private JRadioButton isFile;
+    
+    private JLabel fileName = new JLabel("");
+    private JTextField path = new JTextField("");
+    private JLabel date = new JLabel("");
+    private JLabel size = new JLabel("");
+    private JCheckBox readable = new JCheckBox("");
+    private JCheckBox writable = new JCheckBox("");
+    private JCheckBox executable = new JCheckBox("");
+    private JRadioButton isDirectory = new JRadioButton("");
+    private JRadioButton isFile = new JRadioButton("");
     JList list = new JList();
     DefaultListModel model = new DefaultListModel();
     
     
 
     public FilePanel() {
+    	App.buildStatusBar("");
         JScrollPane scrollPane = new JScrollPane();
         scrollPane.setViewportView(table);
+        table.setDragEnabled(true);
         add(scrollPane);
         this.setResizable(true);
         
         setVisible(true);
         listSelectionListener = lse -> {
             int row = table.getSelectionModel().getLeadSelectionIndex();
+//            System.out.println("What are you bro1 "+ ((FileTableModel)table.getModel()).getFile(row) );
+//            System.out.println("What are you bro2 "+ ((FileTableModel)table.getModel()).getFile(row).getAbsolutePath() );
+//            long num = ((FileTableModel)table.getModel()).getFile(row).length() + 0;
+//			System.out.println("What are you bro3 "+ ((FileTableModel)table.getModel()).getFile(row).length() );
+//			System.out.println("What are you bro4 "+ num );
+			
+//            App.displayMemoryToStatusBar("I am the ultimate displayer ");
+//            App.displayMemoryToStatusBar("" + num);
+//            System.out.println("What are you bro "+ ((FileTableModel)table.getModel()).getFile(row) );
             setFileDetails( ((FileTableModel)table.getModel()).getFile(row) );
+            
+            
         };
+        
+        
         //DRAG AND DROP FEATURE
 //        list.setPreferredSize(new Dimension(500,500));
 //        this.setDropTarget(new MyDropTarget());
 //        list.setDragEnabled(true);
 //        list.setModel(model);
 //        add(list);
+        
 
     }
 
@@ -92,7 +110,11 @@ public class FilePanel extends JInternalFrame {
     }
 
     private void setFileDetails(File file) {
+    	
+//    	System.out.println("setFileDetails " + file.getName());
+    	
         Icon icon = fileSystemView.getSystemIcon(file);
+        
         fileName.setIcon(icon);
         fileName.setText(fileSystemView.getSystemDisplayName(file));
         path.setText(file.getPath());
@@ -105,43 +127,54 @@ public class FilePanel extends JInternalFrame {
 
         isFile.setSelected(file.isFile());
     }
-    class MyDropTarget extends DropTarget {
-
-    	  public void drop(DropTargetDropEvent evt )
-    	  {
-    	      try
-    	      {
-    	          evt.acceptDrop(DnDConstants.ACTION_COPY);
-    	          List result = new ArrayList();
-//    	          result = (List)evt.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
-    	          if (evt.getTransferable().isDataFlavorSupported(DataFlavor.stringFlavor))
-    	          {
-    	        	  String temp = (String)evt.getTransferable().getTransferData(DataFlavor.stringFlavor);
-    	        	  
-    	        	  String[] next = temp.split("\\n");
-    	        	  
-    	        	  for ( int i = 0; i < next.length; i ++)
-    	        	  {
-    	        		  model.addElement(next[i]);
-    	        	  }
-    	          }
-    	          else
-    	          {
-    	        	  result = (List)evt.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
-    	              for ( Object o : result )
-    	              {
-    	                  System.out.println(o.toString());
-    	                  model.addElement(o.toString());
-    	              }
-    	          }
-
-    	      }
-    	      catch ( Exception ex )
-    	      {
-    	    	  ex.printStackTrace();
-    	      }
-    	  }
-    	}
+//    class MyDropTarget extends DropTarget {
+//
+//    	  public void drop(DropTargetDropEvent evt )
+//    	  {
+//    		  System.out.println("here " );
+//    	      try
+//    	      {
+//    	          evt.acceptDrop(DnDConstants.ACTION_COPY);
+//    	          List result = new ArrayList();
+////    	          result = (List)evt.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
+//    	          System.out.println("here1 data = " + evt.getTransferable().isDataFlavorSupported(DataFlavor.stringFlavor) );
+//    	          if (evt.getTransferable().isDataFlavorSupported(DataFlavor.stringFlavor))
+//    	          {
+//    	        	  String temp = (String)evt.getTransferable().getTransferData(DataFlavor.stringFlavor);
+//    	        	  
+//    	        	  String[] next = temp.split("\\n");
+//    	        	  System.out.println("here2 " );
+//    	        	  for ( int i = 0; i < next.length; i ++)
+//    	        	  {
+//    	        		  model.addElement(next[i]);
+//    	        		  System.out.print("here " + next[i]);
+////    	        		  int row = table.getSelectionModel().getLeadSelectionIndex();
+////    	        		  table.add(desktopIcon);
+////    	        		  System.out.println("tried to drag drop somtetin");
+////    	                  setFileDetails( ((FileTableModel)table.getModel()).getFile(row) );
+//    	        		  
+//    	        	  }
+//    	          }
+//    	          else
+//    	          {
+//    	        	  result = (List)evt.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
+//    	              for ( Object o : result )
+//    	              {
+//    	                  System.out.println("im getting here " + o.toString());
+//    	                  File newFile = new File("C:\\Users\\bridg\\Desktop\\New Text Document (2).txt");
+//    	                  model.addElement(o.toString());
+//    	                  int row = table.getSelectionModel().getLeadSelectionIndex();
+//    	                  setFileDetails( newFile );
+//    	              }
+//    	          }
+//
+//    	      }
+//    	      catch ( Exception ex )
+//    	      {
+//    	    	  ex.printStackTrace();
+//    	      }
+//    	  }
+//    	}
 
 
 }
