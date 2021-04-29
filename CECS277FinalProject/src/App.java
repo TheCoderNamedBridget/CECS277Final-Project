@@ -16,9 +16,12 @@ import javax.swing.tree.DefaultTreeModel;
 
 public class App extends JFrame
 {
-    JPanel panel, topPanel;
+	private final static FileSystemView fileSystemView = FileSystemView.getFileSystemView();
+    static JPanel panel;
+	JPanel topPanel;
     JMenuBar menuBar;
-    JToolBar toolBar, statusBar;
+    JToolBar toolBar;
+	static JToolBar statusBar;
     JComboBox<String> comboBox;
     JDesktopPane desktop;
     FileFrame myFrame;
@@ -75,7 +78,7 @@ public class App extends JFrame
         panel.add(desktop,BorderLayout.CENTER);
 
         currentDrive = "CurrentDrive";
-        buildStatusBar();
+        
         panel.add(statusBar, BorderLayout.SOUTH);
 
 
@@ -83,8 +86,9 @@ public class App extends JFrame
         this.setSize(1000,800);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setVisible(true);
-
-        //this.setDropTarget(new MyDropTarget());
+//
+//        this.setDropTarget(new MyDropTarget());
+//        this.setEnabled(true);
     }
 
 /*    private void buildComboBox(){
@@ -155,9 +159,27 @@ public class App extends JFrame
         panel.add(menuBar, BorderLayout.NORTH);
     }
 
-    private void buildStatusBar() {
-        JLabel status = new JLabel("Total Space: ");
+    public static void buildStatusBar(String space) {
+    	File diskPartition = new File("C:");
+        long totalCapacity = diskPartition.getTotalSpace(); 
+ 
+        long freePartitionSpace = diskPartition.getFreeSpace(); 
+        long usablePatitionSpace = diskPartition.getUsableSpace(); 
+
+        JLabel status = new JLabel("Current Drive C:  Free Space : " 
+        + (freePartitionSpace/ (1024*1024*1024)) + " GB   Used Space: " + (usablePatitionSpace/ (1024*1024*1024)) 
+        + " GB   Total Space: " + ((freePartitionSpace + usablePatitionSpace)/ (1024*1024*1024)) + " GB");
+        
         statusBar.add(status);
+        panel.add(statusBar, BorderLayout.SOUTH);
+
+    }
+    
+    public static void displayMemoryToStatusBar(String space) {
+        JLabel status = new JLabel(space);
+        System.out.println("you wanted me to display this " + space );
+        statusBar.add(status);
+        System.out.println("you wanted me to display this2 " + status.getText() );
         panel.add(statusBar, BorderLayout.SOUTH);
 
     }
@@ -187,25 +209,41 @@ public class App extends JFrame
         }
     }
 
-//    class MyDropTarget extends DropTarget {
+//  class MyDropTarget extends DropTarget {
 //
-//        public void drop(DropTargetDropEvent evt )
-//        {
-//            try
-//            {
-//                evt.acceptDrop(DnDConstants.ACTION_COPY);
-//                List result = new ArrayList<Object>();
-//                result = (List)evt.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
-//                for ( Object o : result )
-//                {
-//                    System.out.println(o.toString());
-//                    model.addElement(o.toString());
-//                }
-//            }
-//            catch ( Exception ex )
-//            {
+//  	  public void drop(DropTargetDropEvent evt )
+//  	  {
+//  	      try
+//  	      {
+//  	          evt.acceptDrop(DnDConstants.ACTION_COPY);
+//  	          List result = new ArrayList();
+////  	          result = (List)evt.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
+//  	          if (evt.getTransferable().isDataFlavorSupported(DataFlavor.stringFlavor))
+//  	          {
+//  	        	  String temp = (String)evt.getTransferable().getTransferData(DataFlavor.stringFlavor);
+//  	        	  
+//  	        	  String[] next = temp.split("\\n");
+//  	        	  
+//  	        	  for ( int i = 0; i < next.length; i ++)
+//  	        	  {
+//  	        		  model.addElement(next[i]);
+//  	        	  }
+//  	          }
+//  	          else
+//  	          {
+//  	        	  result = (List)evt.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
+//  	              for ( Object o : result )
+//  	              {
+//  	                  System.out.println(o.toString());
+//  	                  model.addElement(o.toString());
+//  	              }
+//  	          }
 //
-//            }
-//        }
-//    }
+//  	      }
+//  	      catch ( Exception ex )
+//  	      {
+//  	    	  ex.printStackTrace();
+//  	      }
+//  	  }
+//  	}
 }
