@@ -26,7 +26,19 @@ public class FilePanel extends JInternalFrame {
     JList list = new JList();
     DefaultListModel model = new DefaultListModel();
 
-
+//    public String getItemClicked()
+//	{
+//    	String filePath = "";
+//    	listSelectionListener = lse -> {
+//            int row = table.getSelectionModel().getLeadSelectionIndex();
+//            setFileDetails( ((FileTableModel)table.getModel()).getFile(row) );
+//            System.out.println("this was clicked " + ((FileTableModel)table.getModel()).getFile(row));
+//            filePath = "" + ((FileTableModel)table.getModel()).getFile(row);
+//
+//        };
+//        return filePath;
+//	    
+//	}
 
     public FilePanel() {
         table = new JTable();
@@ -42,7 +54,6 @@ public class FilePanel extends JInternalFrame {
             int row = table.getSelectionModel().getLeadSelectionIndex();
             setFileDetails( ((FileTableModel)table.getModel()).getFile(row) );
 
-
         };
 
 
@@ -53,6 +64,23 @@ public class FilePanel extends JInternalFrame {
         list.setModel(model);
         //add(list);
 
+    }
+    
+    public void fillList(File dir)
+    {
+    	File[] files;
+    	
+    	files = dir.listFiles();
+    	model.clear();
+    	list.removeAll();
+    	for (int i = 0; i < files.length; i++)
+    	{
+    		if( !files[i].isHidden())
+    		{
+    			model.addElement(files[i].getAbsolutePath());
+    		}
+    	}
+    	list.setModel(model);
     }
 
     public static void setTableData(File[] files) {
