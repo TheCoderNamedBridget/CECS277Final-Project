@@ -132,6 +132,7 @@ public class App extends JFrame
         expandBranch.addActionListener(new RunActionListener());
         collapseBranch.addActionListener(new RunActionListener());
         run.addActionListener(new RunActionListener());
+        rename.addActionListener(new RenameActionListener());
         newW.addActionListener(new RunActionListener());
         help.addActionListener(new RunActionListener());
         exit.addActionListener(new ExitActionListener());
@@ -174,7 +175,24 @@ public class App extends JFrame
         panel.add(statusBar, BorderLayout.SOUTH);
 
     }
+    
+    
 
+    private class RenameActionListener implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if (e.getActionCommand().equals("Tree"))
+            {
+                System.out.println("Running the Program");
+            } else if(e.getActionCommand().equals("New")){
+                desktop.add(new FileFrame());
+            }
+            else
+            {
+                System.out.println("Debugging the program");
+            }
+        }
+    }
 
     private class RunActionListener implements ActionListener {
         @Override
