@@ -1,4 +1,5 @@
 import javax.swing.*;
+import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.filechooser.FileSystemView;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -11,6 +12,7 @@ import java.util.List;
 public class DirPanel extends JInternalFrame {
     private final JTree dirTree = new JTree();
     private FileSystemView fileSystemView;
+    FilePanel filePanel;
 
     public DirPanel() {
         buildTree();
@@ -24,6 +26,11 @@ public class DirPanel extends JInternalFrame {
         add(scrollPane);
         this.setResizable(true);
         setVisible(true);
+    }
+    
+    public void setFilePanel( FilePanel fp )
+    {
+    	filePanel = fp;
     }
 
     private void buildTree() {
@@ -52,6 +59,8 @@ public class DirPanel extends JInternalFrame {
         dirTree.setRootVisible(false);
         dirTree.setModel(treeModel);
         dirTree.expandRow(0);
+        
+        dirTree.addTreeSelectionListener(new MyTreeSelectionListener());
     }
 
     private void showChildren(final DefaultMutableTreeNode node) {
@@ -88,6 +97,25 @@ public class DirPanel extends JInternalFrame {
             }
         };
         worker.execute();
+    }
+    
+    class MyTreeSelectionListener implements TreeSelectionListener
+    {
+
+		@Override
+		public void valueChanged(TreeSelectionEvent e) {
+			System.out.println(e.getPath());
+			
+			DefaultMutableTreeNode node = (DefaultMutableTreeNode)
+					dirTree.getLastSelectedPathComponent();
+			System.out.println(node);
+			if (node.toString().equals("C:\\Users\\bridg\\Desktop\\Bridget's Website"))
+			{
+				filePanel.fillList(new File("C:\\"));
+			}
+			
+		}
+    	
     }
 
 }
