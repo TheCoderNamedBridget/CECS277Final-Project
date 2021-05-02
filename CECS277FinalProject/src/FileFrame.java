@@ -10,6 +10,7 @@ public class FileFrame extends JInternalFrame
     {
         FilePanel filePanel = new FilePanel();
         DirPanel dirPanel = new DirPanel();
+        dirPanel.setFilePanel(filePanel);
         fileSystemView = FileSystemView.getFileSystemView();
 
         splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, dirPanel , filePanel);
