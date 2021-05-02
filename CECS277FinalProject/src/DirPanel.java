@@ -5,6 +5,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import java.awt.*;
 import java.io.File;
+import java.util.Arrays;
 import java.util.List;
 
 public class DirPanel extends JInternalFrame {
@@ -27,7 +28,8 @@ public class DirPanel extends JInternalFrame {
 
     private void buildTree() {
         fileSystemView = FileSystemView.getFileSystemView();
-        DefaultMutableTreeNode root = new DefaultMutableTreeNode(fileSystemView.getHomeDirectory());
+        DefaultMutableTreeNode root = new DefaultMutableTreeNode();
+        System.out.println(Arrays.toString(root.getPath()));
         DefaultTreeModel treeModel = new DefaultTreeModel(root);
 
         TreeSelectionListener treeSelectionListener = tse -> {
@@ -39,7 +41,7 @@ public class DirPanel extends JInternalFrame {
         for (File fileSystemRoot : roots) {
             DefaultMutableTreeNode node = new DefaultMutableTreeNode(fileSystemRoot);
             root.add(node);
-            File[] files = fileSystemView.getFiles(fileSystemRoot, true);
+            File[] files = fileSystemView.getFiles(fileSystemRoot.getAbsoluteFile(), true);
             for (File file : files) {
                 if (file.isDirectory()) {
                     node.add(new DefaultMutableTreeNode(file));
@@ -47,12 +49,13 @@ public class DirPanel extends JInternalFrame {
             }
         }
         dirTree.addTreeSelectionListener(treeSelectionListener);
-        dirTree.setModel(treeModel);
         dirTree.setRootVisible(false);
+        dirTree.setModel(treeModel);
+        dirTree.expandRow(0);
     }
 
     private void showChildren(final DefaultMutableTreeNode node) {
-        dirTree.setEnabled(false);
+        //dirTree.setEnabled(false);
 
         SwingWorker<Void, File> worker = new SwingWorker<>() {
             @Override
