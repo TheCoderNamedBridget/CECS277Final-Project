@@ -4,28 +4,31 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DropTarget;
 import java.awt.dnd.DropTargetDropEvent;
-import java.awt.event.*;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.channels.FileChannel;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import javax.swing.filechooser.FileSystemView;
-import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreePath;
 
 
 public class App extends JFrame
 {
-	private final static FileSystemView fileSystemView = FileSystemView.getFileSystemView();
+    private final static FileSystemView fileSystemView = FileSystemView.getFileSystemView();
     static JPanel panel;
-	JPanel topPanel;
+    static JPanel topPanel;
     JMenuBar menuBar;
     JToolBar toolBar;
-	static JToolBar statusBar;
+    static JToolBar statusBar;
     JComboBox<String> comboBox;
-    JDesktopPane desktop;
-    FileFrame myFrame;
+    protected static Desktop desktop;
+    static JDesktopPane desktopPane;
+    static FileFrame myFrame;
     String currentDrive;
+    static File currentFile;
     JList list = new JList();
     DefaultListModel model = new DefaultListModel();
 
@@ -37,8 +40,9 @@ public class App extends JFrame
         menuBar = new JMenuBar();
         toolBar = new JToolBar();
         statusBar = new JToolBar();
-        desktop = new JDesktopPane();
+        desktopPane = new JDesktopPane();
         myFrame = new FileFrame();
+        desktop = Desktop.getDesktop();
 
         //buildModel();
 //        } catch (IOException ex){
@@ -46,14 +50,14 @@ public class App extends JFrame
 //        }
     }
 
-/*    private void buildModel()
+   private void buildModel()
     {
         model.addElement("You can drag and drop files on me");
         model.addElement("I am just here to demonstrate functionality");
         model.addElement("there are comments are labeled [TODO] around where I was added");
         list.setPreferredSize(new Dimension(280, 300));
         list.setModel(model);
-    }*/
+    }
 
     public void go()
     {
@@ -65,8 +69,9 @@ public class App extends JFrame
 
         topPanel.add(menuBar,BorderLayout.NORTH);
 
-        //buildComboBox();
-        //topPanel.add(comboBox,BorderLayout.NORTH);
+        //TODO Set up ComboBox for drive selection.
+//        buildComboBox();
+//        panel.add(comboBox,BorderLayout.NORTH);
 
         panel.add(topPanel, BorderLayout.NORTH);
         this.add(panel);
@@ -74,11 +79,11 @@ public class App extends JFrame
         //TODO Change this later this is just here for drag nad drop functionality
         //panel.add(list, BorderLayout.NORTH);
 
-        desktop.add(myFrame);
-        panel.add(desktop,BorderLayout.CENTER);
+        desktopPane.add(myFrame);
+        panel.add(desktopPane,BorderLayout.CENTER);
 
         currentDrive = "CurrentDrive";
-        
+
         panel.add(statusBar, BorderLayout.SOUTH);
 
 
@@ -91,15 +96,15 @@ public class App extends JFrame
 //        this.setEnabled(true);
     }
 
-/*    private void buildComboBox(){
+    private void buildComboBox(){
         File[] drives = File.listRoots();
         ArrayList<String> list = new ArrayList<String>();
         for(File x : drives){
             list.add(x.getName());
         }
-        //FileSystemView fsv = FileSystemView.getFileSystemView();
+        FileSystemView fsv = FileSystemView.getFileSystemView();
         comboBox= new JComboBox<>(list.toArray(new String[list.size()]));
-    }*/
+    }
 
 
     private void buildMenu()
@@ -115,11 +120,14 @@ public class App extends JFrame
         JMenuItem copy = new JMenuItem("Copy");
         JMenuItem delete = new JMenuItem("Delete");
         JMenuItem run = new JMenuItem("Run");
+
         JMenuItem exit = new JMenuItem("Exit");
 
         //menu options for tree
         JMenuItem expandBranch = new JMenuItem("ExpandBranch");
+
         JMenuItem collapseBranch = new JMenuItem("CollapseBranch");
+
 
         //menu options for window
         JMenuItem newW = new JMenuItem("New");
@@ -129,14 +137,47 @@ public class App extends JFrame
         JMenuItem about = new JMenuItem("About");
         JMenuItem help = new JMenuItem("Help");
 
-        expandBranch.addActionListener(new RunActionListener());
-        collapseBranch.addActionListener(new RunActionListener());
-        run.addActionListener(new RunActionListener());
-        rename.addActionListener(new RenameActionListener());
-        newW.addActionListener(new RunActionListener());
-        help.addActionListener(new RunActionListener());
-        exit.addActionListener(new ExitActionListener());
-        about.addActionListener(new AboutActionListener());
+        rename.addActionListener(e -> {
+            //renameFile();
+        });
+
+        copy.addActionListener(e -> {
+            //copyFile();
+        });
+
+        delete.addActionListener(ae -> {
+            //deleteFile();
+        });
+
+        expandBranch.addActionListener(e -> {
+
+        });
+
+        collapseBranch.addActionListener(e -> {
+
+        });
+        run.addActionListener(ae -> {
+            try {
+                desktop.open(currentFile);
+            } catch (Throwable t) {
+                showThrowable(t);
+            }
+            panel.repaint();
+        });
+
+        exit.addActionListener(e -> System.exit(0));
+
+        about.addActionListener(e -> {
+            AboutDlg dlg = new AboutDlg(null,true);
+
+            dlg.setVisible(true);
+        });
+
+        help.addActionListener(e -> {
+            HelpDlg helpDlg = new HelpDlg(null,true);
+
+            helpDlg.setVisible(true);
+        });
 
         fileMenu.add(rename);
         fileMenu.add(copy);
@@ -160,100 +201,196 @@ public class App extends JFrame
         panel.add(menuBar, BorderLayout.NORTH);
     }
 
-    public static void buildStatusBar(String space) {
-    	File diskPartition = new File("C:");
-        long totalCapacity = diskPartition.getTotalSpace(); 
- 
-        long freePartitionSpace = diskPartition.getFreeSpace(); 
-        long usablePatitionSpace = diskPartition.getUsableSpace(); 
+    public static void buildStatusBar(){
+        File diskPartition = new File(FileSystemView.getFileSystemView().getDefaultDirectory().getPath());
+        long totalCapacity = diskPartition.getTotalSpace();
 
-        JLabel status = new JLabel("Current Drive C:  Free Space : " 
-        + (freePartitionSpace/ (1024*1024*1024)) + " GB   Used Space: " + (usablePatitionSpace/ (1024*1024*1024)) 
-        + " GB   Total Space: " + ((freePartitionSpace + usablePatitionSpace)/ (1024*1024*1024)) + " GB");
-        
+        long freePartitionSpace = diskPartition.getFreeSpace();
+        long usablePartitionSpace = diskPartition.getUsableSpace();
+
+        JLabel status = new JLabel("Current Drive"+ (diskPartition.getName())  + "Free Space : "
+                + (freePartitionSpace / (1024*1024*1024)) + " GB   Used Space: " + (usablePartitionSpace/ (1024*1024*1024))
+                + " GB   Total Space: " + ((totalCapacity)/ (1024*1024*1024)) + " GB");
+
         statusBar.add(status);
         panel.add(statusBar, BorderLayout.SOUTH);
 
     }
-    
-    
 
-    private class RenameActionListener implements ActionListener {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            if (e.getActionCommand().equals("Tree"))
-            {
-                System.out.println("Running the Program");
-            } else if(e.getActionCommand().equals("New")){
-                desktop.add(new FileFrame());
-            }
-            else
-            {
-                System.out.println("Debugging the program");
+  class MyDropTarget extends DropTarget {
+
+  	  public void drop(DropTargetDropEvent evt )
+  	  {
+  	      try
+  	      {
+  	          evt.acceptDrop(DnDConstants.ACTION_COPY);
+  	          ArrayList result = new ArrayList();
+//  	          result = (List)evt.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
+  	          if (evt.getTransferable().isDataFlavorSupported(DataFlavor.stringFlavor))
+  	          {
+  	        	  String temp = (String)evt.getTransferable().getTransferData(DataFlavor.stringFlavor);
+
+  	        	  String[] next = temp.split("\\n");
+
+  	        	  for ( int i = 0; i < next.length; i ++)
+  	        	  {
+  	        		  model.addElement(next[i]);
+  	        	  }
+  	          }
+  	          else
+  	          {
+  	        	  result = (ArrayList) evt.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
+  	              for ( Object o : result )
+  	              {
+  	                  System.out.println(o.toString());
+  	                  model.addElement(o.toString());
+  	              }
+  	          }
+
+  	      }
+  	      catch ( Exception ex )
+  	      {
+  	    	  ex.printStackTrace();
+  	      }
+  	  }
+  	}
+private void showThrowable(Throwable t) {
+    t.printStackTrace();
+    JOptionPane.showMessageDialog(
+            panel,
+            t.toString(),
+            t.getMessage(),
+            JOptionPane.ERROR_MESSAGE
+    );
+    panel.repaint();
+}
+    private void showErrorMessage(String errorMessage, String errorTitle) {
+        JOptionPane.showMessageDialog(
+                panel,
+                errorMessage,
+                errorTitle,
+                JOptionPane.ERROR_MESSAGE
+        );
+    }
+    private void deleteFile() {
+        if (currentFile==null) {
+            showErrorMessage("No file selected for deletion.","Select File");
+            return;
+        }
+
+        int result = JOptionPane.showConfirmDialog(
+                panel,
+                "Are you sure you want to delete this file?",
+                "Delete File",
+                JOptionPane.YES_NO_OPTION
+        );
+        if (result==JOptionPane.OK_OPTION) {
+            try {
+                System.out.println("currentFile: " + currentFile);
+                TreePath parentPath = DirPanel.findTreePath(currentFile.getParentFile());
+                System.out.println("parentPath: " + parentPath);
+                DefaultMutableTreeNode parentNode =
+                        (DefaultMutableTreeNode)parentPath.getLastPathComponent();
+                System.out.println("parentNode: " + parentNode);
+
+                boolean directory = currentFile.isDirectory();
+                boolean deleted = currentFile.delete();
+                if (deleted) {
+                    if (directory) {
+                        // delete the node..
+                        TreePath currentPath = DirPanel.findTreePath(currentFile);
+                        System.out.println(currentPath);
+                        DefaultMutableTreeNode currentNode =
+                                (DefaultMutableTreeNode)currentPath.getLastPathComponent();
+
+                        DirPanel.treeModel.removeNodeFromParent(currentNode);
+                    }
+
+                    DirPanel.showChildren(parentNode);
+                } else {
+                    String msg = "The file '" +
+                            currentFile +
+                            "' could not be deleted.";
+                    showErrorMessage(msg,"Delete Failed");
+                }
+            } catch(Throwable t) {
+                showThrowable(t);
             }
         }
+        panel.repaint();
     }
 
-    private class RunActionListener implements ActionListener {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            if (e.getActionCommand().equals("Tree"))
-            {
-                System.out.println("Running the Program");
-            } else if(e.getActionCommand().equals("New")){
-                desktop.add(new FileFrame());
-            }
-            else
-            {
-                System.out.println("Debugging the program");
+    private void renameFile() {
+        if (currentFile==null) {
+            showErrorMessage("No file selected to rename.","Select File");
+            return;
+        }
+
+        String renameTo = JOptionPane.showInputDialog(panel, "New Name");
+        if (renameTo!=null) {
+            try {
+                boolean directory = currentFile.isDirectory();
+                TreePath parentPath = DirPanel.findTreePath(currentFile.getParentFile());
+                DefaultMutableTreeNode parentNode =
+                        (DefaultMutableTreeNode)parentPath.getLastPathComponent();
+
+                boolean renamed = currentFile.renameTo(new File(
+                        currentFile.getParentFile(), renameTo));
+                if (renamed) {
+                    if (directory) {
+                        // rename the node..
+
+                        // delete the current node..
+                        TreePath currentPath = DirPanel.findTreePath(currentFile);
+                        System.out.println(currentPath);
+                        DefaultMutableTreeNode currentNode =
+                                (DefaultMutableTreeNode)currentPath.getLastPathComponent();
+
+                        DirPanel.treeModel.removeNodeFromParent(currentNode);
+
+                        // add a new node..
+                    }
+
+                    DirPanel.showChildren(parentNode);
+                } else {
+                    String msg = "The file '" +
+                            currentFile +
+                            "' could not be renamed.";
+                    showErrorMessage(msg,"Rename Failed");
+                }
+            } catch(Throwable t) {
+                showThrowable(t);
             }
         }
+        panel.repaint();
     }
-    private static class AboutActionListener implements ActionListener{
+    public static boolean copyFile(File from, File to) throws IOException {
 
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            AboutDlg dlg = new AboutDlg(null,true);
+        boolean created = to.createNewFile();
 
-            dlg.setVisible(true);
+        if (created) {
+            FileChannel fromChannel = null;
+            FileChannel toChannel = null;
+            try {
+                fromChannel = new FileInputStream(from).getChannel();
+                toChannel = new FileOutputStream(to).getChannel();
+
+                toChannel.transferFrom(fromChannel, 0, fromChannel.size());
+
+                // set the flags of the to the same as the from
+                to.setReadable(from.canRead());
+                to.setWritable(from.canWrite());
+                to.setExecutable(from.canExecute());
+            } finally {
+                if (fromChannel != null) {
+                    fromChannel.close();
+                }
+                if (toChannel != null) {
+                    toChannel.close();
+                }
+                return false;
+            }
         }
+        return created;
     }
-
-//  class MyDropTarget extends DropTarget {
-//
-//  	  public void drop(DropTargetDropEvent evt )
-//  	  {
-//  	      try
-//  	      {
-//  	          evt.acceptDrop(DnDConstants.ACTION_COPY);
-//  	          List result = new ArrayList();
-////  	          result = (List)evt.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
-//  	          if (evt.getTransferable().isDataFlavorSupported(DataFlavor.stringFlavor))
-//  	          {
-//  	        	  String temp = (String)evt.getTransferable().getTransferData(DataFlavor.stringFlavor);
-//  	        	  
-//  	        	  String[] next = temp.split("\\n");
-//  	        	  
-//  	        	  for ( int i = 0; i < next.length; i ++)
-//  	        	  {
-//  	        		  model.addElement(next[i]);
-//  	        	  }
-//  	          }
-//  	          else
-//  	          {
-//  	        	  result = (List)evt.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
-//  	              for ( Object o : result )
-//  	              {
-//  	                  System.out.println(o.toString());
-//  	                  model.addElement(o.toString());
-//  	              }
-//  	          }
-//
-//  	      }
-//  	      catch ( Exception ex )
-//  	      {
-//  	    	  ex.printStackTrace();
-//  	      }
-//  	  }
-//  	}
 }
