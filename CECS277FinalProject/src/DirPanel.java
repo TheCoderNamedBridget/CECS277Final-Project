@@ -1,20 +1,24 @@
 import javax.swing.*;
-import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.filechooser.FileSystemView;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
 import java.awt.*;
 import java.io.File;
-import java.util.Arrays;
 import java.util.List;
 
 public class DirPanel extends JInternalFrame {
-    private final JTree dirTree = new JTree();
-    private FileSystemView fileSystemView;
-    FilePanel filePanel;
+    private static JTree dirTree;
+    private static JLabel fileName;
+    private static FileSystemView fileSystemView;
+    static DefaultTreeModel treeModel;
+    private static DefaultMutableTreeNode root;
 
     public DirPanel() {
+        dirTree = new JTree();
+        fileName = new JLabel("");
         buildTree();
         JScrollPane scrollPane = new JScrollPane();
         scrollPane.setViewportView(dirTree);
@@ -24,31 +28,30 @@ public class DirPanel extends JInternalFrame {
                 (int)preferredSize.getHeight());
         scrollPane.setPreferredSize( widePreferred );
         add(scrollPane);
-        this.setResizable(true);
+        setResizable(true);
         setVisible(true);
-    }
-    
-    public void setFilePanel( FilePanel fp )
-    {
-    	filePanel = fp;
     }
 
     private void buildTree() {
         fileSystemView = FileSystemView.getFileSystemView();
-        DefaultMutableTreeNode root = new DefaultMutableTreeNode();
-        System.out.println(Arrays.toString(root.getPath()));
-        DefaultTreeModel treeModel = new DefaultTreeModel(root);
+        root = new DefaultMutableTreeNode();
+        treeModel = new DefaultTreeModel(root);
 
         TreeSelectionListener treeSelectionListener = tse -> {
             DefaultMutableTreeNode node = (DefaultMutableTreeNode) tse.getPath().getLastPathComponent();
             showChildren(node);
+            File file = (File) node.getUserObject();
+            if (file.isDirectory()) {
+                System.out.println(file.getPath());
+                App.myFrame.setTitle(file.getAbsolutePath());
+            }
         };
 
         File[] roots = fileSystemView.getRoots();
         for (File fileSystemRoot : roots) {
             DefaultMutableTreeNode node = new DefaultMutableTreeNode(fileSystemRoot);
             root.add(node);
-            File[] files = fileSystemView.getFiles(fileSystemRoot.getAbsoluteFile(), true);
+            File[] files = fileSystemView.getFiles(fileSystemRoot, true);
             for (File file : files) {
                 if (file.isDirectory()) {
                     node.add(new DefaultMutableTreeNode(file));
@@ -56,16 +59,14 @@ public class DirPanel extends JInternalFrame {
             }
         }
         dirTree.addTreeSelectionListener(treeSelectionListener);
+        dirTree.setCellRenderer(new FileTreeCellRenderer());
         dirTree.setRootVisible(false);
         dirTree.setModel(treeModel);
         dirTree.expandRow(0);
-        
-        dirTree.addTreeSelectionListener(new MyTreeSelectionListener());
     }
 
-    private void showChildren(final DefaultMutableTreeNode node) {
-        //dirTree.setEnabled(false);
-
+    static void showChildren(final DefaultMutableTreeNode node) {
+        dirTree.setEnabled(false);
         SwingWorker<Void, File> worker = new SwingWorker<>() {
             @Override
             public Void doInBackground() {
@@ -79,7 +80,7 @@ public class DirPanel extends JInternalFrame {
                             }
                         }
                     }
-                    FilePanel.setTableData(files);
+                   FilePanel.setTableData(files);
                 }
                 return null;
             }
@@ -98,24 +99,19 @@ public class DirPanel extends JInternalFrame {
         };
         worker.execute();
     }
-    
-    class MyTreeSelectionListener implements TreeSelectionListener
-    {
+    protected static TreePath findTreePath(File find) {
+        for (int ii=0; ii<dirTree.getRowCount(); ii++) {
+            TreePath treePath = dirTree.getPathForRow(ii);
+            Object object = treePath.getLastPathComponent();
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode)object;
+            File nodeFile = (File)node.getUserObject();
 
-		@Override
-		public void valueChanged(TreeSelectionEvent e) {
-			System.out.println(e.getPath());
-			
-			DefaultMutableTreeNode node = (DefaultMutableTreeNode)
-					dirTree.getLastSelectedPathComponent();
-			System.out.println(node);
-			if (node.toString().equals("C:\\Users\\bridg\\Desktop\\Bridget's Website"))
-			{
-				filePanel.fillList(new File("C:\\"));
-			}
-			
-		}
-    	
+            if (nodeFile==find) {
+                return treePath;
+            }
+        }
+        // not found!
+        return null;
     }
 
 }
