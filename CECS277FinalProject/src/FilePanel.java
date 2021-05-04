@@ -7,42 +7,42 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DropTarget;
 import java.awt.dnd.DropTargetDropEvent;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 public class FilePanel extends JInternalFrame {
     protected static JTable table;
-    private final static FileSystemView fileSystemView = FileSystemView.getFileSystemView();
-    private static FileTableModel fileTableModel;
+    private static FileSystemView fileSystemView;
+    private static FilePanelModel filePanelModel;
     private static ListSelectionListener listSelectionListener;
-    private static boolean cellSizesSet = false;
+    private static boolean cellSizesSet;
 
-    private JLabel fileName = new JLabel("");
-    private JTextField path = new JTextField("");
-    private JLabel date = new JLabel("");
-    private JLabel size = new JLabel("");
-    JList list = new JList();
-    DefaultListModel model = new DefaultListModel();
+    private static JLabel fileName;
+    private static JTextField path;
+    private static JLabel date;
+    private static JLabel size;
+    static JList list;
+    static DefaultListModel model;
 
-//    public String getItemClicked()
-//	{
-//    	String filePath = "";
-//    	listSelectionListener = lse -> {
-//            int row = table.getSelectionModel().getLeadSelectionIndex();
-//            setFileDetails( ((FileTableModel)table.getModel()).getFile(row) );
-//            System.out.println("this was clicked " + ((FileTableModel)table.getModel()).getFile(row));
-//            filePath = "" + ((FileTableModel)table.getModel()).getFile(row);
-//
-//        };
-//        return filePath;
-//	    
-//	}
+
 
     public FilePanel() {
         table = new JTable();
-        App.buildStatusBar("");
+        fileSystemView = FileSystemView.getFileSystemView();
+        list = new JList();
+        model = new DefaultListModel();
+        cellSizesSet = false;
+        fileName = new JLabel("");
+        path = new JTextField("");
+        date = new JLabel("");
+        size = new JLabel("");
+
+        App.buildStatusBar();
         JScrollPane scrollPane = new JScrollPane();
         scrollPane.setViewportView(table);
         table.setDragEnabled(true);
@@ -52,8 +52,7 @@ public class FilePanel extends JInternalFrame {
         setVisible(true);
         listSelectionListener = lse -> {
             int row = table.getSelectionModel().getLeadSelectionIndex();
-            setFileDetails( ((FileTableModel)table.getModel()).getFile(row) );
-
+            setFileDetails( ((FilePanelModel)table.getModel()).getFile(row) );
         };
 
 
@@ -65,30 +64,13 @@ public class FilePanel extends JInternalFrame {
         //add(list);
 
     }
-    
-    public void fillList(File dir)
-    {
-    	File[] files;
-    	
-    	files = dir.listFiles();
-    	model.clear();
-    	list.removeAll();
-    	for (int i = 0; i < files.length; i++)
-    	{
-    		if( !files[i].isHidden())
-    		{
-    			model.addElement(files[i].getAbsolutePath());
-    		}
-    	}
-    	list.setModel(model);
-    }
 
     public static void setTableData(File[] files) {
-        fileTableModel = new FileTableModel();
-        table.setModel(fileTableModel);
+        filePanelModel = new FilePanelModel();
+        table.setModel(filePanelModel);
 
         table.getSelectionModel().removeListSelectionListener(listSelectionListener);
-        fileTableModel.setFiles(files);
+        filePanelModel.setFiles(files);
         table.getSelectionModel().addListSelectionListener(listSelectionListener);
         if (!cellSizesSet) {
             Icon icon = fileSystemView.getSystemIcon(files[0]);
@@ -121,10 +103,11 @@ public class FilePanel extends JInternalFrame {
         tableColumn.setMinWidth(width);
     }
 
-    void setFileDetails(File file) {
+    static void setFileDetails(File file) {
 
-//    	System.out.println("setFileDetails " + file.getName());
+    	System.out.println("setFileDetails " + file.getName());
 
+        App.currentFile = file;
         Icon icon = fileSystemView.getSystemIcon(file);
 
         fileName.setIcon(icon);
