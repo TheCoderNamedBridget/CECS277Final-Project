@@ -1,21 +1,18 @@
 import javax.swing.*;
-import javax.swing.filechooser.FileSystemView;
 
 public class FileFrame extends JInternalFrame
 {
-
     JSplitPane splitPane;
-    FileSystemView fileSystemView;
+    DirPanel dirPanel;
+    FilePanel filePanel;
+
     public  FileFrame()
     {
-        FilePanel filePanel = new FilePanel();
-        DirPanel dirPanel = new DirPanel();
-        dirPanel.setFilePanel(filePanel);
-        fileSystemView = FileSystemView.getFileSystemView();
+        dirPanel = new DirPanel();
+        filePanel = new FilePanel();
 
         splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, dirPanel , filePanel);
 
-        this.setTitle("C:");
 
         this.getContentPane().add(splitPane);
         this.setResizable(true);
