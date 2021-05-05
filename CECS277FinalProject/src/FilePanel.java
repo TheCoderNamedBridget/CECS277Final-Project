@@ -7,10 +7,7 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DropTarget;
 import java.awt.dnd.DropTargetDropEvent;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -18,7 +15,6 @@ import java.util.List;
 public class FilePanel extends JInternalFrame {
     protected static JTable table;
     private static FileSystemView fileSystemView;
-    private static FilePanelModel filePanelModel;
     private static ListSelectionListener listSelectionListener;
     private static boolean cellSizesSet;
 
@@ -28,6 +24,7 @@ public class FilePanel extends JInternalFrame {
     private static JLabel size;
     static JList list;
     static DefaultListModel model;
+    static FilePanelModel fpm;
 
 
 
@@ -41,6 +38,7 @@ public class FilePanel extends JInternalFrame {
         path = new JTextField("");
         date = new JLabel("");
         size = new JLabel("");
+        fpm = new FilePanelModel();
 
         App.buildStatusBar();
         JScrollPane scrollPane = new JScrollPane();
@@ -48,6 +46,7 @@ public class FilePanel extends JInternalFrame {
         table.setDragEnabled(true);
         add(scrollPane);
         this.setResizable(true);
+        table.setModel(fpm);
 
         setVisible(true);
         listSelectionListener = lse -> {
@@ -66,7 +65,7 @@ public class FilePanel extends JInternalFrame {
     }
 
     public static void setTableData(File[] files) {
-        filePanelModel = new FilePanelModel();
+        FilePanelModel filePanelModel = new FilePanelModel();
         table.setModel(filePanelModel);
 
         table.getSelectionModel().removeListSelectionListener(listSelectionListener);
