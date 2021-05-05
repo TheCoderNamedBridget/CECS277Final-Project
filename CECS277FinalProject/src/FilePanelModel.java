@@ -4,28 +4,22 @@ import javax.swing.table.AbstractTableModel;
 import java.io.File;
 import java.util.Date;
 
-public class FileTableModel extends AbstractTableModel {
+public class FilePanelModel extends AbstractTableModel {
 
     private File[] files;
     private FileSystemView fileSystemView = FileSystemView.getFileSystemView();
     private String[] columns = {
-            "Icon",
+            "        ",
             "File",
-            "Path/name",
-            "Size",
             "Last Modified",
-            "R",
-            "W",
-            "E",
-            "D",
-            "F",
+            "Size",
     };
 
-    FileTableModel() {
+    FilePanelModel() {
         this(new File[0]);
     }
 
-    FileTableModel(File[] files) {
+    FilePanelModel(File[] files) {
         this.files = files;
     }
 
@@ -37,21 +31,9 @@ public class FileTableModel extends AbstractTableModel {
             case 1:
                 return fileSystemView.getSystemDisplayName(file);
             case 2:
-                return file.getPath();
+                return file.lastModified();
             case 3:
                 return file.length();
-            case 4:
-                return file.lastModified();
-            case 5:
-                return file.canRead();
-            case 6:
-                return file.canWrite();
-            case 7:
-                return file.canExecute();
-            case 8:
-                return file.isDirectory();
-            case 9:
-                return file.isFile();
             default:
                 System.err.println("Logic Error");
         }
@@ -65,9 +47,8 @@ public class FileTableModel extends AbstractTableModel {
     public Class<?> getColumnClass(int column) {
         return switch (column) {
             case 0 -> ImageIcon.class;
+            case 2 -> Date.class;
             case 3 -> Long.class;
-            case 4 -> Date.class;
-            case 5, 6, 7, 8, 9 -> Boolean.class;
             default -> String.class;
         };
     }
