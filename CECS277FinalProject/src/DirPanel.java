@@ -15,6 +15,7 @@ public class DirPanel extends JInternalFrame {
     private static FileSystemView fileSystemView;
     static DefaultTreeModel treeModel;
     private static DefaultMutableTreeNode root;
+    static FilePanel filePanel;
 
     public DirPanel() {
         dirTree = new JTree();
@@ -43,7 +44,7 @@ public class DirPanel extends JInternalFrame {
             File file = (File) node.getUserObject();
             if (file.isDirectory()) {
                 System.out.println(file.getPath());
-                App.myFrame.setTitle(file.getAbsolutePath());
+
             }
         };
 
@@ -114,4 +115,7 @@ public class DirPanel extends JInternalFrame {
         return null;
     }
 
+    public void setFilePanel(FilePanel fp) {
+        filePanel = fp;
+    }
 }
