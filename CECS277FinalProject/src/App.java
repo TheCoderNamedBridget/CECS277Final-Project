@@ -44,6 +44,7 @@ public class App extends JFrame
         myFrame = new FileFrame();
         desktop = Desktop.getDesktop();
 
+        
         //buildModel();
 //        } catch (IOException ex){
 //            Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
@@ -138,7 +139,7 @@ public class App extends JFrame
         JMenuItem help = new JMenuItem("Help");
 
         rename.addActionListener(e -> {
-            //renameFile();
+            renameFile();
         });
 
         copy.addActionListener(e -> {
@@ -146,7 +147,7 @@ public class App extends JFrame
         });
 
         delete.addActionListener(e -> {
-            //deleteFile();
+            deleteFile();
         });
 
         expandBranch.addActionListener(e -> {
@@ -272,7 +273,7 @@ public class App extends JFrame
   	      }
   	  }
   	}
-private void showThrowable(Throwable t) {
+private static void showThrowable(Throwable t) {
     t.printStackTrace();
     JOptionPane.showMessageDialog(
             panel,
@@ -282,7 +283,7 @@ private void showThrowable(Throwable t) {
     );
     panel.repaint();
 }
-    private void showErrorMessage(String errorMessage, String errorTitle) {
+    private static void showErrorMessage(String errorMessage, String errorTitle) {
         JOptionPane.showMessageDialog(
                 panel,
                 errorMessage,
@@ -290,7 +291,7 @@ private void showThrowable(Throwable t) {
                 JOptionPane.ERROR_MESSAGE
         );
     }
-    private void deleteFile() {
+    static void deleteFile() {
         if (currentFile==null) {
             showErrorMessage("No file selected for deletion.","Select File");
             return;
@@ -338,20 +339,36 @@ private void showThrowable(Throwable t) {
         panel.repaint();
     }
 
-    private void renameFile() {
+    public static void renameFile() {
         if (currentFile==null) {
             showErrorMessage("No file selected to rename.","Select File");
             return;
         }
+        
 
+        // exception is here!!!
+//        File oldFile = new File(currentFile.getParentFile(), null);
+//
+//        File newFileOrDirectoryName = new File(newFileName);
+//        if (oldFile.renameTo(newFileOrDirectoryName)) {
+//            System.out.println("renamed");
+//        } else {
+//            System.out.println("Error");
+//        }
         String renameTo = JOptionPane.showInputDialog(panel, "New Name");
         if (renameTo!=null) {
             try {
                 boolean directory = currentFile.isDirectory();
                 TreePath parentPath = DirPanel.findTreePath(currentFile.getParentFile());
+                
+                
+                
                 DefaultMutableTreeNode parentNode =
                         (DefaultMutableTreeNode)parentPath.getLastPathComponent();
-
+                currentFile.renameTo(new File(
+                        currentFile.getParentFile(), renameTo));
+                
+                System.out.println("currentFile " + currentFile.getAbsolutePath() + " renameTo " + renameTo);
                 boolean renamed = currentFile.renameTo(new File(
                         currentFile.getParentFile(), renameTo));
                 if (renamed) {
