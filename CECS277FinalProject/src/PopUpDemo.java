@@ -17,5 +17,15 @@ class PopUpDemo extends JPopupMenu {
         add(copy);
         add(paste);
         add(delete);
+        
+        
+        rename.addActionListener(e -> {
+        App.renameFile();
+    });
+        
+        delete.addActionListener(e -> {
+            App.deleteFile();
+        });
+        
     }
 }
