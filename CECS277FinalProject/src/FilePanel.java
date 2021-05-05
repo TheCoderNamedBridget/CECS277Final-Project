@@ -26,7 +26,7 @@ public class FilePanel extends JInternalFrame {
     static DefaultListModel model;
     static FilePanelModel fpm;
 
-
+    
 
     public FilePanel() {
         table = new JTable();
@@ -71,6 +71,10 @@ public class FilePanel extends JInternalFrame {
         table.getSelectionModel().removeListSelectionListener(listSelectionListener);
         filePanelModel.setFiles(files);
         table.getSelectionModel().addListSelectionListener(listSelectionListener);
+        
+        //makes the popup window to select rename, copy, delete
+        table.addMouseListener(new PopClickListener());
+        
         if (!cellSizesSet) {
             Icon icon = fileSystemView.getSystemIcon(files[0]);
 
@@ -135,6 +139,7 @@ public class FilePanel extends JInternalFrame {
                 //add the strings to the listmodel
                 for(int i=0; i<next.length;i++)
                     model.addElement(next[i]);
+                
             }
             else{ //then if not String, Files are assumed
                 result =(List)evt.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
