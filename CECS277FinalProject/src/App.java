@@ -75,6 +75,7 @@ public class App extends JFrame
 
         panel.add(topPanel, BorderLayout.NORTH);
         this.add(panel);
+        myFrame.setLocation(0,100);
         myFrame.setVisible(true);
         //TODO Change this later this is just here for drag nad drop functionality
         //panel.add(list, BorderLayout.NORTH);
@@ -97,13 +98,12 @@ public class App extends JFrame
     }
 
     private void buildComboBox(){
-        File[] drives = File.listRoots();
-        ArrayList<String> list = new ArrayList<String>();
+        File[] drives = fileSystemView.getRoots();
+        ArrayList<String> list = new ArrayList<>();
         for(File x : drives){
             list.add(x.getName());
         }
-        FileSystemView fsv = FileSystemView.getFileSystemView();
-        comboBox= new JComboBox<>(list.toArray(new String[list.size()]));
+        comboBox = new JComboBox<>(list.toArray(new String[0]));
     }
 
 
@@ -145,7 +145,7 @@ public class App extends JFrame
             //copyFile();
         });
 
-        delete.addActionListener(ae -> {
+        delete.addActionListener(e -> {
             //deleteFile();
         });
 
@@ -155,6 +155,24 @@ public class App extends JFrame
 
         collapseBranch.addActionListener(e -> {
 
+        });
+
+        newW.addActionListener(e -> {
+            FileFrame newWin = new FileFrame();
+            newWin.setLocation(0,100);
+            desktopPane.add(newWin);
+            panel.repaint();
+        });
+
+        cascade.addActionListener(e -> {
+            FileFrame newWin = new FileFrame();
+            if(myFrame == null){
+                newWin.setLocation(0,100);
+            } else {
+                newWin.setLocation(myFrame.getLocation().x + 25, myFrame.getLocation().y + 25);
+            }
+            desktopPane.add(newWin);
+            panel.repaint();
         });
         run.addActionListener(ae -> {
             try {
